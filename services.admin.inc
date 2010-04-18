@@ -256,7 +256,7 @@ function services_edit_form_endpoint(&$form_state, $form_info) {
  */
 function services_edit_form_endpoint_validate($form, &$form_state) {
   // Test uniqueness of name:
-  if (preg_match("/[^A-Za-z0-9_]/", $form_state['values']['endpoint'])) {
+  if (preg_match("/[^A-Za-z0-9_]/", $form_state['values']['name'])) {
     form_error($form['name'], t('Endpoint name must be alphanumeric or underscores only.'));
   }
   else {
@@ -290,12 +290,14 @@ function services_edit_form_endpoint_submit($form, &$form_state) {
   // Set the authentication modules, and preserve the settings for modules
   // that already exist.
   $auth = array();
-  foreach (array_keys($form_state['values']['authentication']) as $module) {
-    if (isset($endpoint->authentication[$module])) {
-      $auth[$module] = $endpoint->authentication[$module];
-    }
-    else {
-      $auth[$module] = array();
+  if (isset($form_state['values']['authentication'])) {
+    foreach (array_keys($form_state['values']['authentication']) as $module) {
+      if (isset($endpoint->authentication[$module])) {
+        $auth[$module] = $endpoint->authentication[$module];
+      }
+      else {
+        $auth[$module] = array();
+      }
     }
   }
   $endpoint->authentication = $auth;
@@ -304,12 +306,12 @@ function services_edit_form_endpoint_submit($form, &$form_state) {
     drupal_set_message(t('Your new endpoint %title has been saved.', array('%title' => $endpoint->title)));
     services_endpoint_save($endpoint);
     $form_state['values']['eid'] = $endpoint->eid;
-    $form_state['redirect'] = 'admin/build/services/' . $endpoint->name . '/authentication';
+    $form_state['redirect'] = 'admin/config/services/services/' . $endpoint->name . '/authentication';
   }
   else {
     drupal_set_message(t('Your changes have been saved.'));
     services_endpoint_save($endpoint);
-    $form_state['redirect'] = 'admin/build/services';
+    $form_state['redirect'] = 'admin/config/services/services';
   }
 }
 
