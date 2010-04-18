@@ -114,13 +114,15 @@ function services_list_endpoint($js = NULL) {
   }
 
   drupal_add_css(drupal_get_path('module', 'services') . '/css/services.admin.css');
-
-  return drupal_render($table = array(
+  
+  $table = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('No endpoints defined'),
-  ));
+  );
+  
+  return drupal_render($table);
 }
 
 /**
