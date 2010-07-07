@@ -28,7 +28,7 @@ function _user_resource_definition() {
         'help' => 'Creates a user',
         'callback' => '_user_resource_create',
         'access arguments' => array('administer users'),
-        'access arguments append' => TRUE  ,
+        'access arguments append' => false  ,
         'args' => array(
           array(
             'name' => 'account',
