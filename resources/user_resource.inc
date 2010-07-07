@@ -11,8 +11,9 @@ function _user_resource_definition() {
       'retrieve' => array(
         'help' => 'Retrieves a user',
         'callback' => '_user_resource_retrieve',
-        'access callback' => '_user_resource_retrieve_access',
-        'access arguments append' => TRUE,
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('view'),
+        'access arguments append' => true,
         'args' => array(
           array(
             'name' => 'uid',
@@ -27,8 +28,9 @@ function _user_resource_definition() {
       'create' => array(
         'help' => 'Creates a user',
         'callback' => '_user_resource_create',
-        'access arguments' => array('administer users'),
-        'access arguments append' => false  ,
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('create'),
+        'access arguments append' => false,
         'args' => array(
           array(
             'name' => 'account',
@@ -43,8 +45,9 @@ function _user_resource_definition() {
       'update' => array(
         'help' => 'Updates a user',
         'callback' => '_user_resource_update',
-        'access callback' => '_user_resource_update_access',
-        'access arguments append' => TRUE,
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('update'),
+        'access arguments append' => true,
         'args' => array(
           array(
             'name' => 'data',
@@ -59,8 +62,9 @@ function _user_resource_definition() {
       'delete' => array(
         'help' => 'Deletes a user',
         'callback' => '_user_resource_delete',
-        'access arguments' => array('administer users'),
-        'access arguments append' => TRUE,
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('create'),
+        'access arguments append' => false,
         'args' => array(
           array(
             'name' => 'nid',
