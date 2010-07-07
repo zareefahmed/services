@@ -11,8 +11,12 @@ function _user_resource_definition() {
       'retrieve' => array(
         'help' => 'Retrieves a user',
         'callback' => '_user_resource_retrieve',
+<<<<<<< HEAD
+        'access arguments' => array('access user profiles'), // this is probably not enough, doesn't block things like pass and email
+=======
         'access callback' => '_user_resource_retrieve_access',
         'access arguments append' => TRUE,
+>>>>>>> 4abeee2... Fix access check on user_retrieve.
         'args' => array(
           array(
             'name' => 'uid',
@@ -318,6 +322,13 @@ function _user_resource_logout() {
   return TRUE;
 }
 
+<<<<<<< HEAD
+function _user_resource_update_access($args = array()) {
+  global $user;
+  $args[0] = $account;
+  return ($user->uid == $account->uid || user_access('administer users'));
+}
+=======
 /**
  * Access check for user retrieve.
  *
@@ -327,3 +338,4 @@ function _user_resource_retrieve_access($uid) {
   $account = user_load($uid);
   return user_view_access($account);
 }
+>>>>>>> 4abeee2... Fix access check on user_retrieve.
