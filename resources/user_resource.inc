@@ -95,10 +95,6 @@ function _user_resource_definition() {
         'logout' => array(
           'help' => 'Logout a user session',
           'callback' => '_user_resource_logout',
-          'args' => array(
-            array(
-            ),
-          ),
         ),
       ),
     ),
