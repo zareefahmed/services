@@ -296,7 +296,7 @@ function _user_resource_login($username, $password) {
 /**
  * Logout the current user.
  */
-function user_service_logout() {
+function _user_resource_logout() {
   global $user;
 
   if (!$user->uid) {
