@@ -5,9 +5,12 @@
 function _user_resource_definition() {
   return array(
     'user' => array(
+<<<<<<< HEAD
 
       'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
 
+=======
+>>>>>>> 76f5ec6... Add index for users.
       'retrieve' => array(
         'help' => 'Retrieves a user',
         'callback' => '_user_resource_retrieve',
@@ -349,6 +352,16 @@ function _user_resource_logout() {
   return TRUE;
 }
 
+<<<<<<< HEAD
+/**
+ * Access check for user retrieve.
+ *
+ * Wrapper for user_view_access that loads the account from uid.
+ */
+function _user_resource_retrieve_access($uid) {
+  $account = user_load($uid);
+  return user_view_access($account);
+=======
 function _user_resource_index($page = 0, $fields = array(), $parameters = array()) {
   $params = array();
 
@@ -395,4 +408,5 @@ function _user_resource_index($page = 0, $fields = array(), $parameters = array(
     $accounts[$account->uid] = $account;
   }
   return $accounts;
+>>>>>>> 76f5ec6... Add index for users.
 }
