@@ -386,8 +386,6 @@ function _user_resource_index($page = 0, $fields = array(), $parameters = array(
     }
     $sql = "SELECT * FROM {users}" . ((!empty($where))?' WHERE ' . implode(' AND ', $where):'');
   }
-  dsm($sql);
-  dsm($params);
   $res = db_query_range($sql, $params, $page * 20, 20);
 
   $accounts = array();
