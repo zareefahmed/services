@@ -244,7 +244,8 @@ class RESTServer {
   private function parseRequest($method, $controller) {
     switch ($method) {
       case 'POST':
-        if ($_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded') {
+        $content_type = explode('; ', $_SERVER['CONTENT_TYPE']);
+        if (in_array('application/x-www-form-urlencoded', $content_type)) {
           return $_POST;
         }
       case 'PUT':
