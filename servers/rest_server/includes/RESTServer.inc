@@ -6,21 +6,20 @@ class RESTServer {
   /**
    * Handles the call to the REST server
    *
-   * @param object $context
+   * @param string $canonical_path
+   * @param string $endpoint_path
    * @return void
    */
-  public function handle($context) {
-    $this->endpoint_path = $context->endpoint->path;
-
-    // Set uri formatter information.
-    $context->serverInfo->uriFormatter = array(&$this, 'uri_formatter');
+  public function handle($canonical_path, $endpoint_path) {
+    $this->endpoint_path = $endpoint_path;
+    services_set_server_info('resource_uri_formatter', array(&$this, 'uri_formatter'));
 
     // Determine the request method
-    $method = $context->http->headers['request-method'];
-    if ($method == 'POST' && $context->http->get['_method']) {
-      $method = $context->http->get['_method'];
+    $method = $_SERVER['REQUEST_METHOD'];
+    if ($method=='POST' && $_GET['_method']) {
+      $method = $_GET['_method'];
     }
-    $path = split('/', $context->canonicalPath);
+    $path = split('/', $canonical_path);
     $leaf = array_pop($path);
     $resource_name = array_shift($path);
     // Extract response format info from the path
@@ -45,13 +44,14 @@ class RESTServer {
       }
     }
 
-    $endpoint = $context->endpoint;
-    $resources = services_get_resources($endpoint->name);
+    $endpoint = services_get_server_info('endpoint', '');
+    $resources = services_get_resources($endpoint);
+    $controller = FALSE;
     if (!empty($resource_name) && isset($resources[$resource_name])) {
       $resource = $resources[$resource_name];
 
       // Get the operation and fill with default values
-      $this->resolveController($context, $resource, $method, $path);
+      $controller = $this->resolveController($resource, $method, $path);
     }
     else {
       throw new ServicesException(t('Could not find resource @name', array(
@@ -59,13 +59,16 @@ class RESTServer {
         )), 404);
     }
 
-    if (!$context->service->controller) {
+    if (!$controller) {
       throw new ServicesException('Could not find the controller', 404);
     }
 
     // Parse the request data
     $data = array();
-    $arguments = $this->getControllerArguments($context, $path, $method, $data);
+    $arguments = $this->getControllerArguments($controller, $path, $method, $data);
+
+    // Any authentication needed for REST Server must be set in the cookies
+    $auth_arguments = $_COOKIE;
 
     $formats = $this->responseFormatters();
 
@@ -87,9 +90,9 @@ class RESTServer {
       }
 
       // Get the best matching format, default to json
-      if (isset($context->http->headers['accept'])) {
+      if (isset($_SERVER['HTTP_ACCEPT'])) {
         $mime = new Mimeparse();
-        $mime_type = $mime->best_match($mime_candidates, $context->http->headers['accept']);
+        $mime_type = $mime->best_match($mime_candidates, $_SERVER['HTTP_ACCEPT']);
       }
 
       if ($mime_type) {
@@ -124,8 +127,8 @@ class RESTServer {
       // Check if any of the model arguments have been overridden
       if (isset($cm['allow_overrides'])) {
         foreach ($cm['allow_overrides'] as $arg) {
-          if (isset($context->http->get[$formatter['model'] . ':' . $arg])) {
-            $cm['arguments'][$arg] = $context->http->get[$formatter['model'] . ':' . $arg];
+          if (isset($_GET[$formatter['model'] . ':' . $arg])) {
+            $cm['arguments'][$arg] = $_GET[$formatter['model'] . ':' . $arg];
           }
         }
       }
@@ -162,8 +165,8 @@ class RESTServer {
   /**
    * Parses controller arguments from request
    *
-   * @param object $context
-   *  The services context.
+   * @param array $controller
+   *  The controller definition
    * @param string $path
    * @param string $method
    *  The method used to make the request
@@ -171,13 +174,11 @@ class RESTServer {
    *  An array of the sources used for getting the arguments for the call
    * @return void
    */
-  private function getControllerArguments($context, $path, $method, &$sources=array()) {
-    $controller = $context->service->controller;
-
+  private function getControllerArguments($controller, $path, $method, &$sources=array()) {
     // Get argument sources
-    $parameters = $context->get;
+    $parameters = $_GET;
     unset($parameters['_method']);
-    $data = $this->parseRequest($context, $method, $controller);
+    $data = $this->parseRequest($method, $controller);
 
     $defaults = array(
       'path' => $path,
@@ -240,27 +241,16 @@ class RESTServer {
     return $arguments;
   }
 
-  /**
-   * Parses a incoming request.
-   *
-   * @param object $context
-   *  The services context.
-   * @param string $method
-   *  The http request method that was used.
-   * @param string $controller
-   *  The controller that will be used.
-   * @return void
-   */
-  private function parseRequest($context, $method, $controller) {
+  private function parseRequest($method, $controller) {
     switch ($method) {
       case 'POST':
-        if ($context->http->headers['content-type'] == 'application/x-www-form-urlencoded') {
-          return $context->http->post;
+        if ($_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded') {
+          return $_POST;
         }
       case 'PUT':
         // Get the mime type for the request, default to form-urlencoded
-        if (isset($context->http->headers['content-type'])) {
-          $type = self::parseContentHeader($context->http->headers['content-type']);
+        if (isset($_SERVER['CONTENT_TYPE'])) {
+          $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
           $mime = $type['value'];
         }
         else {
@@ -276,9 +266,9 @@ class RESTServer {
         }
 
         // Read the raw input stream
-        $handle = fopen($context->http->inputStream, 'r');
+        $handle = fopen('drupal://input', 'r');
         if ($handle) {
-          $data = call_user_func($parser, $context, $handle);
+          $data = call_user_func($parser, $handle);
           fclose($handle);
         }
         return $data;
@@ -322,11 +312,11 @@ class RESTServer {
     return $content;
   }
 
-  public static function fileRecieve($context, $handle, $validators=array()) {
+  public static function fileRecieve($handle, $validators=array()) {
     $validators['file_validate_name_length'] = array();
 
-    $type = RESTServer::parseContentHeader($context->http->headers['content-type']);
-    $disposition = RESTServer::parseContentHeader($context->http->headers['content-disposition']);
+    $type = RESTServer::parseContentHeader($_SERVER['CONTENT_TYPE']);
+    $disposition = RESTServer::parseContentHeader($_SERVER['HTTP_CONTENT_DISPOSITION']);
 
     $filename = file_munge_filename(trim(basename(($disposition['params']['filename']))));
 
@@ -523,8 +513,7 @@ class RESTServer {
     }
   }
 
-  private function resolveController($context, $resource, $method, $path) {
-    $controller = FALSE;
+  private function resolveController($resource, $method, $path) {
     $pc = count($path);
     // Use the index handler for all empty path request, except on POST
     if (!$pc && $method!='POST') {
@@ -563,9 +552,6 @@ class RESTServer {
     else if ($pc>=2 && $method=='POST') {
       $action = $resource['targeted actions'][$path[1]];
       return $action;
-    }
-    if ($controller) {
-      $context->service->controller = $controller;
     }
   }
 }
