@@ -11,7 +11,6 @@ function _user_resource_definition() {
         'help' => 'Retrieves a user',
         'callback' => '_user_resource_retrieve',
         'access arguments' => array('access user profiles'), // this is probably not enough, doesn't block things like pass and email
-        'access arguments append' => TRUE,
         'args' => array(
           array(
             'name' => 'uid',
