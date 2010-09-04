@@ -32,9 +32,20 @@ function xmlrpc_server_server() {
  */
 function xmlrpc_server_xmlrpc() {
   $callbacks = array();
-  foreach (services_get_all() as $method) {
-    $callbacks[$method['method']] = 'xmlrpc_server_call_wrapper';
+  
+  $resources = services_get_resources();
+  if (!empty($resources)) {
+    module_load_include('inc', 'services', 'services.resource-translation');
+
+    // Translate all resources
+    foreach ($resources as $name => $def) {
+      foreach (_services_resource_as_services($def) as $method) {
+        $callbacks[$method['method']] = 'xmlrpc_server_call_wrapper';
+        $methods[] = $method;
+      }
+    }
   }
+
   return $callbacks;
 }
 
@@ -48,30 +59,32 @@ function xmlrpc_server_call_wrapper() {
   $xmlrpc_server = xmlrpc_server_get();
   $method_name = $xmlrpc_server->message->methodname;
   $args = func_get_args();
-  return services_method_call($method_name, $args);
-}
+  $endpoint = services_get_server_info('endpoint', '');
+  $controller = services_controller_get($method_name, $endpoint);
 
-/**
- * Implementation of hook_server_error().
- *
- * Takes the error message and wraps it into an XMLRPC error object.
- *
- * @see xmlrpc_error() 
- */
-function xmlrpc_server_server_error($message) {
-  if (!is_array($message)) {
-    $message = (array)$message;
-  }
-
-  $message = implode(' ', $message);
-
-  $matches = array();
-  if (preg_match("/\#(\d+)/", $message, $matches)) {
-    $code = $matches[1];
+  try {
+    return services_controller_execute($controller, $args);  
   } 
-  else {
-    $code = 1;
+  catch (Exception $e) {
+    $code = $e->getCode();
+    switch($code) {
+      case 401:
+        drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
+      break;
+      case 404:
+        drupal_set_header('HTTP/1.0 404 Not found: ' . $e->getMessage());
+      break;
+      case 406:
+        drupal_set_header('HTTP/1.0 406 Not Acceptable: ' . $e->getMessage());
+      break;
+      default:
+        if ($code >= 400 && $code < 600) {
+          drupal_set_header('HTTP/1.0 ' . $code . ' ' . $e->getMessage());
+        }
+        else {
+          drupal_set_header('HTTP/1.0 500 An error occurred: (' . $code . ') ' . $e->getMessage());
+        }
+      break;
+    }
   }
-  
-  return xmlrpc_error($code, strip_tags($message));
 }

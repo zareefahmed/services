@@ -26,6 +26,10 @@ function hook_server_info() {
 
 /**
  * Acts on requests to the server defined in hook_server_info().
+ *
+ * This is the main entry point to your server implementation.
+ * Need to get some more description about the best way to implement
+ * servers.
  */
 function hook_server() {
   
