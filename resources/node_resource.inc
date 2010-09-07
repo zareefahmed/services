@@ -284,9 +284,6 @@ function _node_resource_index($page = 0, $fields = array(), $parameters = array(
  * @return bool
  *
  * @see node_access()
- *
- * @todo Add a query builder that doesn't rely on a contrib module (maybe 
- *   similar to the one recently written for Deploy.)
  **/
 function _node_resource_access($op = 'view', $args = array()) {
   if ($op != 'create' && !empty($args)) {
