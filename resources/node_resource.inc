@@ -286,11 +286,18 @@ function _node_resource_index($page = 0, $fields = array(), $parameters = array(
  * @see node_access()
  **/
 function _node_resource_access($op = 'view', $args = array()) {
+  // Make sure we have an object or this all fails, some servers can
+  // mess up the types.
+  if (is_array($args[0])) {
+    $args[0] = (object) $args[0];
+  }
+
   if ($op != 'create' && !empty($args)) {
     $node = node_load($args[0]);
   }
   else if ($op == 'create') {
     $node = $args[0]->type;
   }
+
   return node_access($op, $node);
 }
