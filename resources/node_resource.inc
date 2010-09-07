@@ -108,6 +108,19 @@ function _node_resource_definition() {
   );
 }
 
+/**
+ * Returns the results of a node_load() for the specified node.
+ *
+ * This returned node may optionally take content_permissions settings into
+ * account, based on a configuration setting. 
+ *
+ * @param $nid
+ *   NID of the node we want to return.
+ * @return
+ *   Node object or FALSE if not found.
+ *
+ * @see node_load()
+ **/
 function _node_resource_retrieve($nid) {
   global $user;
   $node = node_load($nid);
@@ -130,6 +143,20 @@ function _node_resource_retrieve($nid) {
   return $node;
 }
 
+/**
+ * Creates a new node based on submitted values.
+ *
+ * Note that this function uses drupal_execute() to create new nodes,
+ * which may require very specific formatting. The full implications of this
+ * are beyond the scope of this comment block. The Googles are your friend.
+ *
+ * @param $node
+ *   Array representing the attributes a node edit form would submit.
+ * @return
+ *   Node object with its new nid specified.
+ *
+ * @see drupal_execute()
+ **/
 function _node_resource_create($node) {
   $node = (object)$node;
 
@@ -161,6 +188,25 @@ function _node_resource_create($node) {
   );
 }
 
+/**
+ * Updates a new node based on submitted values.
+ *
+ * Note that this function uses drupal_execute() to create new nodes,
+ * which may require very specific formatting. The full implications of this
+ * are beyond the scope of this comment block. The Googles are your friend.
+ *
+ * @param $nid
+ *   Node ID of the node we're editing.
+ * @param $node
+ *   Array representing the attributes a node edit form would submit.
+ * @return
+ *   The node's nid.
+ *
+ * @see drupal_execute()
+ *
+ * @todo Is the $nid parameter really necessary? Also is it more appropriate
+ *   to return the nid here or the object like the create function does?
+ **/
 function _node_resource_update($nid, $node) {
   $node = (object)$node;
   $node->nid = $nid;
@@ -190,34 +236,34 @@ function _node_resource_update($nid, $node) {
   return $node->nid;
 }
 
+/**
+ * Delete a node given its nid.
+ *
+ * @param $nid
+ *   Node ID of the node we're deleting.
+ * @return
+ *   The node's nid.
+ **/
 function _node_resource_delete($nid) {
-  node_delete($nid);
+  return node_delete($nid);
   return TRUE;
 }
 
+/**
+ * Return an array of optionally paged nids baed on a set of criteria.
+ *
+ * @param $page
+ *   Page number of results to return (in pages of 20).
+ * @return
+ *   An array of node objects.
+ *
+ * @todo Add a query builder that doesn't rely on a contrib module (maybe 
+ *   similar to the one recently written for Deploy.)
+ **/
 function _node_resource_index($page = 0, $fields = array(), $parameters = array()) {
   $params = array();
 
-  if (module_exists('query_builder')) {
-    $builder = new QueryBuilder();
-    $parameters = (array)$parameters;
-
-    if (isset($parameters['__describe'])) {
-      return $builder->describe();
-    }
-
-    if (is_string($fields) && !empty($fields)) {
-      $fields = preg_split('/,\s?/', $fields);
-    }
-
-    if (!user_access('administer nodes') || !isset($parameters['status'])) {
-      $parameters['status'] = 1;
-    }
-    list($sql, $params) = $builder->query($fields, $parameters);
-  }
-  else {
-    $sql = "SELECT * FROM {node} WHERE status = 1 ORDER BY sticky DESC, created DESC";
-  }
+  $sql = "SELECT * FROM {node} WHERE status = 1 ORDER BY sticky DESC, created DESC";
   $res = db_query_range($sql, $params, $page * 20, 20);
 
   $events = array();
@@ -228,6 +274,20 @@ function _node_resource_index($page = 0, $fields = array(), $parameters = array(
   return $events;
 }
 
+/**
+ * Determine whether the current user can access a node resource.
+ *
+ * @param $op
+ *   One of view, update, create, delete per node_access().
+ * @param $args
+ *   Resource arguments passed through from the original request.
+ * @return bool
+ *
+ * @see node_access()
+ *
+ * @todo Add a query builder that doesn't rely on a contrib module (maybe 
+ *   similar to the one recently written for Deploy.)
+ **/
 function _node_resource_access($op = 'view', $args = array()) {
   if ($op != 'create' && !empty($args)) {
     $node = node_load($args[0]);
@@ -237,4 +297,3 @@ function _node_resource_access($op = 'view', $args = array()) {
   }
   return node_access($op, $node);
 }
-
