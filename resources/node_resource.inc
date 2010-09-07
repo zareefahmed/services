@@ -103,7 +103,6 @@ function _node_resource_definition() {
           ),
         ),
         'access arguments' => array('access content'),
-        'access arguments append' => FALSE,
       ),
     ),
   );
@@ -228,3 +227,14 @@ function _node_resource_index($page = 0, $fields = array(), $parameters = array(
   }
   return $events;
 }
+
+function _node_resource_access($op = 'view', $args = array()) {
+  if ($op != 'create' && !empty($args)) {
+    $node = node_load($args[0]);
+  }
+  else if ($op == 'create') {
+    $node = $args[0]->type;
+  }
+  return node_access($op, $node);
+}
+

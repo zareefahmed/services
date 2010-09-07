@@ -255,3 +255,11 @@ function taxonomy_service_select_nodes($tids = array(), $fields = array(), $oper
 
   return $nodes;
 }
+
+function _taxonomy_resource_access($op = 'view', $args = array()) {
+  if (user_access('administer taxonomy')) {
+    return TRUE;
+  }
+  // TODO - check perms of user to return ability to interact with terms / vocabulary
+}
+

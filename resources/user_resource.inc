@@ -319,3 +319,9 @@ function user_service_logout() {
 
   return TRUE;
 }
+
+function _user_resource_update_access($args = array()) {
+  global $user;
+  $args[0] = $account;
+  return ($user->uid == $account->uid || user_access('administer users'));
+}

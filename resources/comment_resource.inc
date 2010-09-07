@@ -303,3 +303,36 @@ function _comment_resource_count_all($nid) {
 function _comment_resource_count_new($nid, $since = 0) {
   return comment_num_new($nid, $since);
 }
+
+/**
+ * Access check callback for comment controllers.
+ */
+function _comment_resource_access($op = 'view', $args = array()) {
+  if (user_access('administer comments')) {
+    return TRUE;
+  }
+
+  if ($op=='create') {
+    $comment = (object)$args[0];
+  }
+  else {
+    $comment = _comment_load($args[0]);
+  }
+
+  switch ($op) {
+    case 'view':
+      // Check if the user has access to comments and that the node has comments enabled
+      return $comment->status && user_access('access comments') && _comment_resource_node_access($comment->nid);
+    case 'edit':
+      // Check if the user may edit the comment, and has access to the input format
+      return comment_access('edit', $comment) && filter_access($comment->format);
+    case 'create':
+      // Check if the user may post comments, and has access to the used format and
+      // check if the node has comments enabled, and that the user has access to the node
+      return user_access('post comments') && filter_access($comment->format) &&
+        _comment_resource_node_access($comment->nid, COMMENT_NODE_READ_WRITE);
+    case 'delete':
+      // Check if the user may edit the comment
+      return comment_access('edit', $comment);
+  }
+}
