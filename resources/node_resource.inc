@@ -256,24 +256,39 @@ function _node_resource_delete($nid) {
  *
  * @param $page
  *   Page number of results to return (in pages of 20).
+ * @param $parameters
+ *   An array of fields and values used to build a sql WHERE clause indicating
+ *   what items should be deleted.
  * @return
  *   An array of node objects.
- *
- * @todo Add a query builder that doesn't rely on a contrib module (maybe 
- *   similar to the one recently written for Deploy.)
  **/
-function _node_resource_index($page = 0, $fields = array(), $parameters = array()) {
-  $params = array();
+function _node_resource_index($page = 0, $parameters = array()) {
+  $schema = drupal_get_schema('node');
+  $where = array();
 
-  $sql = "SELECT * FROM {node} WHERE status = 1 ORDER BY sticky DESC, created DESC";
-  $res = db_query_range($sql, $params, $page * 20, 20);
-
-  $events = array();
-  while ($event = db_fetch_object($res)) {
-    $event->uri = services_resource_uri(array('node', $event->nid));
-    $events[] = $event;
+  // Build an array of fields with the appropriate placeholders for use in
+  // db_query().
+  foreach ($parameters as $field => $value) {
+    $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
   }
-  return $events;
+
+  // Now implode that array into an actual WHERE clause.
+  $where = implode(' AND ', $where);
+
+  // Run through db_rewrite_sql to make sure proper access checks are applied.
+  $sql = "SELECT * FROM {node} WHERE $where ORDER BY sticky DESC, created DESC";
+  $result = db_query_range(db_rewrite_sql($sql), $parameters, $page * 20, 20));
+
+  // Put together array of matching nodes to return.
+  $nodes = array();
+  while ($node = db_fetch_object($result)) {
+    if ($uri = services_resource_uri(array('node', $node->nid))) {
+      $node->uri = $uri;
+    }
+    $nodes[] = $node;
+  }
+
+  return $nodes;
 }
 
 /**
