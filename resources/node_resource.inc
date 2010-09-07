@@ -114,7 +114,7 @@ function _node_resource_retrieve($nid) {
 
   if ($node) {
     // Apply field level content permissions
-    if (module_exists('content')) {
+    if (module_exists('content') && variable_get('services_use_content_permissions', TRUE)) {
       $fields = content_fields(NULL, $node->type);
       foreach ($fields as $field_name => $field_info) {
         if (isset($node->$field_name)) {
