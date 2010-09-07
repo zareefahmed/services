@@ -3,6 +3,12 @@
 /**
  * @file
  *  Enable XML-RPC for services module.
+ *
+ * Most of the work here is converting the REST-style resource definitions
+ * to XMLRPC-style procedure calls. These procedures are renamed as 
+ * <resource>.<method>. So the node resource's retrieve method has an XMLRPC
+ * procedure name of node.retrieve. Actions prepend 'action_' to the procedure
+ * name. So the login action of the user resource becomes user.action_login. 
  */
 
 /**
@@ -35,13 +41,10 @@ function xmlrpc_server_xmlrpc() {
   
   $resources = services_get_resources();
   if (!empty($resources)) {
-    module_load_include('inc', 'services', 'services.resource-translation');
-
     // Translate all resources
     foreach ($resources as $name => $def) {
-      foreach (_services_resource_as_services($def) as $method) {
+      foreach (_xmlrpc_server_resources_as_procedures($def) as $method) {
         $callbacks[$method['method']] = 'xmlrpc_server_call_wrapper';
-        $methods[] = $method;
       }
     }
   }
@@ -87,4 +90,70 @@ function xmlrpc_server_call_wrapper() {
       break;
     }
   }
+}
+
+/**
+ * Convert a resource to XMLRPC-style methods.
+ *
+ * @param array $resource
+ *   A resource definition.
+ *
+ * @return array
+ *   An array of XMLRPC method definitions
+ */
+function _xmlrpc_server_resources_as_procedures($resource) {
+  static $controllers = array(
+    'create' => 'create',
+    'delete' => 'delete',
+    'retrieve' => 'retrieve',
+    'update' => 'update',
+    'index' => 'index',
+  ), $subcontrollers = array(
+    'relationships' => 'related',
+    'targeted actions' => 'targeted_action',
+  );
+
+  $methods = array();
+
+  foreach ($controllers as $attr => $name) {
+    if (isset($resource[$attr])) {
+      $methods[] = _xmlrpc_server_resource_controller_as_procedure($resource['name'], $name, $resource[$attr]);
+    }
+  }
+
+  foreach ($subcontrollers as $attr => $name) {
+    if (isset($resource[$attr])) {
+      foreach ($resource[$attr] as $sc_name => $controller) {
+        $methods[] = _xmlrpc_server_resource_controller_as_procedure($resource['name'], $name .'_'. $sc_name, $controller);
+      }
+    }
+  }
+
+  if (isset($resource['actions'])) {
+    foreach ($resource['actions'] as $sc_name => $controller) {
+      $methods[] = _xmlrpc_server_resource_controller_as_procedure($resource['name'], 'action_'. $sc_name, $controller);
+    }
+  }
+
+  return $methods;
+}
+
+/**
+ * Helper function for _xmlrpc_server_resources_as_procedures() that turns a resource
+ * controller into an XMLRPC method.
+ *
+ * @param $resource
+ *   The resource being converted (node, user, etc.)
+ * @param $name
+ *   The method name (retrieve, create, etc.)
+ * @param $controller
+ *   Associative array defining the method's properties and callbacks.
+ *
+ */
+function _xmlrpc_server_resource_controller_as_procedure($resource, $name, $controller) {
+  $method = array_merge($controller, array(
+    'method' => $resource .'.'. $name,
+  ));
+
+  return $method;
 }
