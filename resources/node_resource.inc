@@ -153,7 +153,8 @@ function _node_resource_retrieve($nid) {
  * @param $node
  *   Array representing the attributes a node edit form would submit.
  * @return
- *   Node object with its new nid specified.
+ *   An associative array contained the new node's nid and, if applicable,
+ *   the fully qualified URI to this resource.
  *
  * @see drupal_execute()
  **/
@@ -182,10 +183,11 @@ function _node_resource_create($node) {
     return services_error(implode("\n", $errors), 406);
   }
 
-  return (object)array(
-    'nid' => $nid,
-    'uri' => services_resource_uri(array('node', $nid)),
-  );
+  $node = array('nid' => $nid);
+  if ($uri = services_resource_uri(array('node', $nid))) {
+    $node['uri'] = $uri;
+  }
+  return $node;
 }
 
 /**
@@ -204,8 +206,7 @@ function _node_resource_create($node) {
  *
  * @see drupal_execute()
  *
- * @todo Is the $nid parameter really necessary? Also is it more appropriate
- *   to return the nid here or the object like the create function does?
+ * @todo Is the $nid parameter really necessary?
  **/
 function _node_resource_update($nid, $node) {
   $node = (object)$node;
