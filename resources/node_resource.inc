@@ -183,6 +183,7 @@ function _node_resource_create($node) {
     return services_error(implode("\n", $errors), 406);
   }
 
+  // Only add the URI for servers that support it.
   $node = array('nid' => $nid);
   if ($uri = services_resource_uri(array('node', $nid))) {
     $node['uri'] = $uri;
