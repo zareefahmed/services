@@ -74,7 +74,6 @@ function _user_resource_definition() {
         'login' => array(
           'help' => 'Login a user for a new session',
           'callback' => '_user_resource_login',
-          'access arguments' => array('access content'),
           'args' => array(
             array(
               'name' => 'username',
@@ -96,7 +95,6 @@ function _user_resource_definition() {
         'logout' => array(
           'help' => 'Logout a user session',
           'callback' => '_user_resource_logout',
-          'access arguments' => array('access content'),
         ),
       ),
     ),
