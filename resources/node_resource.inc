@@ -165,6 +165,9 @@ function _node_resource_create($node) {
     return services_error('Missing node type', 406);
   }
 
+  // Unset the nid to make sure that only an insert occurs.
+  unset($node->nid);
+
   // Load the required includes for drupal_execute
   module_load_include('inc', 'node', 'node.pages');
   $nid = NULL;
