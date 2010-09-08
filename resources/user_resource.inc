@@ -1,6 +1,7 @@
 <?php
 // $Id: node_resource.inc,v 1.1 2010/03/08 20:01:41 hugowetterberg Exp $
 
+
 function _user_resource_definition() {
   return array(
     'user' => array(
