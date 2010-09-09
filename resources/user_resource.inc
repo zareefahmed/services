@@ -63,7 +63,7 @@ function _user_resource_definition() {
         'help' => 'Deletes a user',
         'callback' => '_user_resource_delete',
         'access callback' => '_user_resource_access',
-        'access arguments' => array('create'),
+        'access arguments' => array('delete'),
         'access arguments append' => FALSE,
         'args' => array(
           array(
