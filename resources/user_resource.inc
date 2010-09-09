@@ -390,12 +390,15 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
 
   // Now implode that array into an actual WHERE clause.
   $where = !empty($where) ? ' WHERE '. db_escape_string(implode(' AND ', $where)) : '';
-  $sql = "SELECT * FROM {users} $where";
+  $sql = "SELECT $fields FROM {users} $where";
   $result = db_query_range($sql, $parameters, $page * 20, 20);
 
   // Put together array of matching accounts to return.
   $accounts = array();
   while ($account = db_fetch_object($result)) {
+    if ($uri = services_resource_uri(array('user', $account->uid))) {
+      $account->uri = $uri;
+    }
     $accounts[$account->uid] = $account;
   }
   return $accounts;
