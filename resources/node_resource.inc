@@ -99,7 +99,7 @@ function _node_resource_definition() {
             'type' => 'struct',
             'description' => 'Parameters',
             'default value' => NULL,
-            'source' => 'param',
+            'source' => array('param' => 'parameters'),
           ),
         ),
         'access arguments' => array('access content'),
