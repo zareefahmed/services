@@ -407,3 +407,21 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
   }
   return $accounts;
 }
+
+/**
+ * Access check callback for user resource.
+ */
+function _user_resource_access($op = 'view', $args = array()) {
+  global $user;
+  switch($op) {
+    case 'view':
+      $account = user_load($args[0]);
+      return user_view_access($account);
+    case 'update':
+      $args[0] = $account;
+      return ($user->uid == $account->uid || user_access('administer users'));
+    case 'create':
+    case 'delete':
+      return user_access('administer users');
+  }
+}
