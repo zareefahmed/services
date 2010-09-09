@@ -13,7 +13,7 @@ function _user_resource_definition() {
         'callback' => '_user_resource_retrieve',
         'access callback' => '_user_resource_access',
         'access arguments' => array('view'),
-        'access arguments append' => true,
+        'access arguments append' => TRUE,
         'args' => array(
           array(
             'name' => 'uid',
@@ -30,7 +30,7 @@ function _user_resource_definition() {
         'callback' => '_user_resource_create',
         'access callback' => '_user_resource_access',
         'access arguments' => array('create'),
-        'access arguments append' => false,
+        'access arguments append' => FALSE,
         'args' => array(
           array(
             'name' => 'account',
@@ -47,7 +47,7 @@ function _user_resource_definition() {
         'callback' => '_user_resource_update',
         'access callback' => '_user_resource_access',
         'access arguments' => array('update'),
-        'access arguments append' => true,
+        'access arguments append' => TRUE,
         'args' => array(
           array(
             'name' => 'data',
@@ -64,7 +64,7 @@ function _user_resource_definition() {
         'callback' => '_user_resource_delete',
         'access callback' => '_user_resource_access',
         'access arguments' => array('create'),
-        'access arguments append' => false,
+        'access arguments append' => FALSE,
         'args' => array(
           array(
             'name' => 'nid',
