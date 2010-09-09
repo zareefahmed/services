@@ -205,7 +205,7 @@ class RESTServer {
           }
           else {
             if (isset($sources[$info['source']])) {
-              $arguments[$i] = $sources[$info['source']];
+              $arguments[$i] = $sources[$info['source']][$info['name']];
             }
           }
           // Convert arrays to objects and objects to arrays to be more tolerant
