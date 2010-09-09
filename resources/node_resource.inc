@@ -277,7 +277,7 @@ function _node_resource_delete($nid) {
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
  **/
-function _node_resource_index($page = 0, $fields = array(), $parameters = array()) {
+function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
   $parameters = (array) $parameters;
   $schema = drupal_get_schema('node');
   $where = array();
