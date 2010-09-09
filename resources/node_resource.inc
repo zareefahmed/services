@@ -165,9 +165,6 @@ function _node_resource_create($node) {
     return services_error('Missing node type', 406);
   }
 
-  // Unset the nid to make sure that only an insert occurs.
-  unset($node->nid);
-
   // Load the required includes for drupal_execute
   module_load_include('inc', 'node', 'node.pages');
   $nid = NULL;
@@ -257,17 +254,34 @@ function _node_resource_delete($nid) {
 /**
  * Return an array of optionally paged nids baed on a set of criteria.
  *
+ * An example request might look like
+ *
+ * http://domain/endpoint/node?fields=nid,vid&parameters[nid]=7&parameters[uid]=1
+ *
+ * This would return an array of objects with only nid and vid defined, where
+ * nid = 7 and uid = 1.
+ *
  * @param $page
  *   Page number of results to return (in pages of 20).
+ * @param $fields
+ *   The fields you want returned. 
  * @param $parameters
  *   An array of fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
  * @return
  *   An array of node objects.
+ *
+ * @todo 
+ *   Evaluate the functionality here in general. Particularly around
+ *     - Do we need fields at all? Should this just return full nodes?
+ *     - Is there an easier syntax we can define which can make the urls
+ *       for index requests more straightforward?
  **/
-function _node_resource_index($page = 0, $parameters = array()) {
+function _node_resource_index($page = 0, $fields = array(), $parameters = array()) {
+  $parameters = (array) $parameters;
   $schema = drupal_get_schema('node');
   $where = array();
+  $fields = db_escape_string($fields);
 
   // Build an array of fields with the appropriate placeholders for use in
   // db_query().
@@ -276,11 +290,12 @@ function _node_resource_index($page = 0, $parameters = array()) {
   }
 
   // Now implode that array into an actual WHERE clause.
-  $where = implode(' AND ', $where);
+  $where = db_escape_string(implode(' AND ', $where));
 
   // Run through db_rewrite_sql to make sure proper access checks are applied.
-  $sql = "SELECT * FROM {node} WHERE $where ORDER BY sticky DESC, created DESC";
-  $result = db_query_range(db_rewrite_sql($sql), $parameters, $page * 20, 20));
+  $sql = "SELECT $fields FROM {node} WHERE $where ORDER BY sticky DESC, created DESC";
+  $sql = db_rewrite_sql($sql);
+  $result = db_query_range($sql, $parameters, $page * 20, 20);
 
   // Put together array of matching nodes to return.
   $nodes = array();
