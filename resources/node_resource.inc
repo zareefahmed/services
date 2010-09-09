@@ -283,6 +283,13 @@ function _node_resource_index($page = 0, $fields = array(), $parameters = array(
   $where = array();
   $fields = db_escape_string($fields);
 
+
+  // Limit to published nodes if user doesn't have 'administer nodes'
+  // permissions.
+  if (!user_access('administer nodes')) {	
+    $parameters['status'] = 1;
+  }
+  
   // Build an array of fields with the appropriate placeholders for use in
   // db_query().
   foreach ($parameters as $field => $value) {
