@@ -297,10 +297,10 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
   }
 
   // Now implode that array into an actual WHERE clause.
-  $where = db_escape_string(implode(' AND ', $where));
+  $where = !empty($where) ? ' WHERE '. db_escape_string(implode(' AND ', $where)) : '';
 
   // Run through db_rewrite_sql to make sure proper access checks are applied.
-  $sql = "SELECT $fields FROM {node} WHERE $where ORDER BY sticky DESC, created DESC";
+  $sql = "SELECT $fields FROM {node} $where ORDER BY sticky DESC, created DESC";
   $sql = db_rewrite_sql($sql);
   $result = db_query_range($sql, $parameters, $page * 20, 20);
 
