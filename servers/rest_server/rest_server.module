@@ -1,18 +1,13 @@
 <?php
 // $Id$
 
-/**
- * Implementation of hook_server_info().
- */
 function rest_server_server_info() {
   return array(
     'name' => 'REST',
+    'path' => 'rest',
   );
 }
 
-/**
- * Implementation of hook_autoload_info().
- */
 function rest_server_autoload_info() {
   module_load_include('inc', 'rest_server');
   return _rest_server_autoload_info();
@@ -26,9 +21,6 @@ function rest_server_enable() {
   autoload_flush_caches();
 }
 
-/**
- * Implementation of hook_server().
- */
 function rest_server_server() {
   $endpoint_path = services_get_server_info('endpoint_path', 'services/rest');
   $canonical_path = trim(substr($_GET['q'], drupal_strlen($endpoint_path)), '/');
@@ -69,26 +61,33 @@ function rest_server_server() {
  * Implementation of hook_services_resources_alter().
  */
 function rest_server_services_resources_alter($resources, $endpoint) {
+  // Set the default models for the retrieve and index controllers in the node
+  // resource if they are not already set.
   if (isset($resources['node'])) {
-    if (!isset($resources['node']['retrieve']['models'])) {
-      $resources['node']['retrieve']['models'] = array();
+    if (isset($resources['node']['retrieve'])) {
+      if (!isset($resources['node']['retrieve']['models'])) {
+        $resources['node']['retrieve']['models'] = array();
+      }
+      $resources['node']['retrieve']['models'] += array(
+        'ResourceFeedModel' => array(
+          'class' => 'NodeResourceFeedModel',
+          'arguments' => array('source' => 'single'),
+        ),
+      );
     }
-    $resources['node']['retrieve']['models'] += array(
-      'ResourceFeedModel' => array(
-        'class' => 'NodeResourceFeedModel',
-        'arguments' => array('source' => 'single'),
-      ),
-    );
-    if (!isset($resources['node']['index']['models'])) {
-      $resources['node']['index']['models'] = array();
+
+    if (isset($resources['node']['index'])) {
+      if (!isset($resources['node']['index']['models'])) {
+        $resources['node']['index']['models'] = array();
+      }
+      $resources['node']['index']['models'] += array(
+        'ResourceFeedModel' => array(
+          'class' => 'NodeResourceFeedModel',
+        ),
+        'ResourceTimeFeedModel' => array(
+          'class' => 'NodeResourceFeedModel',
+        ),
+      );
     }
-    $resources['node']['index']['models'] += array(
-      'ResourceFeedModel' => array(
-        'class' => 'NodeResourceFeedModel',
-      ),
-      'ResourceTimeFeedModel' => array(
-        'class' => 'NodeResourceFeedModel',
-      ),
-    );
   }
 }
