@@ -88,7 +88,7 @@ function _user_resource_definition() {
             'optional' => TRUE,
             'type' => 'string',
             'description' => 'The fields to get.',
-            'default value' => '',
+            'default value' => '*',
             'source' => array('param' => 'fields'),
           ),
           array(
@@ -97,7 +97,7 @@ function _user_resource_definition() {
             'type' => 'struct',
             'description' => 'Parameters',
             'default value' => NULL,
-            'source' => 'param',
+            'source' => array('param' => 'parameters'),
           ),
         ),
         'access arguments' => array('access user profiles'),
@@ -349,29 +349,53 @@ function _user_resource_logout() {
   return TRUE;
 }
 
-function _user_resource_index($page = 0, $fields = array(), $parameters = array()) {
-  $params = array();
+/**
+ * Return an array of optionally paged nids baed on a set of criteria.
+ *
+ * An example request might look like
+ *
+ * http://domain/endpoint/user?fields=uid,name,mail&parameters[uid]=1
+ *
+ * This would return an array of objects with only uid, name and mail defined,
+ * where uid = 1.
+ *
+ * @param $page
+ *   Page number of results to return (in pages of 20).
+ * @param $fields
+ *   The fields you want returned. 
+ * @param $parameters
+ *   An array of fields and values used to build a sql WHERE clause indicating
+ *   what items should be deleted.
+ * @return
+ *   An array of user objects.
+ *
+ * @see _node_resource_index() for more notes
+ **/
+function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
+  $parameters = (array) $parameters;
+  $schema = drupal_get_schema('node');
+  $where = array();
+  $fields = db_escape_string($fields);
 
   $parameters = (array)$parameters;
-  if (!user_access('administer users') || !isset($parameters['active'])) {
+  if (!user_access('administer users')) {
     $parameters['active'] = 1;
   }
-  // Only allow fields that actually exist.
-  $user_fields = user_fields();
-  foreach($parameters as $key => $param) {
-    if (in_array($key, $user_fields)) {
-      // Only using strings for now since it is mostly safe for all types.
-      // TODO: fix the placeholder type.
-      $where[] = $key . " = '%s'";
-      $params[] = $param;
-    }
+ 
+  // Build an array of fields with the appropriate placeholders for use in
+  // db_query().
+  foreach ($parameters as $field => $value) {
+    $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
   }
-  $sql = "SELECT * FROM {users}" . ((!empty($where))?' WHERE ' . implode(' AND ', $where):'');
 
-  $res = db_query_range($sql, $params, $page * 20, 20);
+  // Now implode that array into an actual WHERE clause.
+  $where = !empty($where) ? ' WHERE '. db_escape_string(implode(' AND ', $where)) : '';
+  $sql = "SELECT * FROM {users} $where";
+  $result = db_query_range($sql, $parameters, $page * 20, 20);
 
+  // Put together array of matching accounts to return.
   $accounts = array();
-  while ($account = db_fetch_object($res)) {
+  while ($account = db_fetch_object($result)) {
     $accounts[$account->uid] = $account;
   }
   return $accounts;
