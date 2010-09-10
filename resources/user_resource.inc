@@ -126,12 +126,14 @@ function _user_resource_definition() {
               'source' => array('data' => 'pass'),
               'optional' => FALSE,
             ),
+            'access_callback' => 'services_access_menu',
           ),
         ),
 
         'logout' => array(
           'help' => 'Logout a user session',
           'callback' => '_user_resource_logout',
+          'access_callback' => 'services_access_menu',
         ),
       ),
     ),
