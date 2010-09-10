@@ -145,7 +145,14 @@ function services_menu() {
 }
 
 /**
- * Access callback that always returns TRUE.
+ * Access callback that always returns TRUE. 
+ *
+ * This callback is necessary for services like login and logout that should 
+ * always be wide open and accessible. 
+ *
+ * *** USE THIS WITH GREAT CAUTION ***
+ *
+ * If you think you need it you are almost certainly wrong.
  */
 function services_access_menu() {
   return TRUE;
