@@ -19,7 +19,7 @@ function _comment_resource_definition() {
         'access arguments append' => TRUE,
         'args' => array(
           array(
-            'name' => 'ccomment',
+            'name' => 'comment',
             'type' => 'struct',
             'description' => 'The comment object',
             'source' => 'data',
