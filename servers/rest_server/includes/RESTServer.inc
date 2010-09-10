@@ -204,8 +204,15 @@ class RESTServer {
             }
           }
           else {
+            // For indexes, retrieve the named source, but for other requests, just
+            // retrieve the source as a whole.
             if (isset($sources[$info['source']])) {
-              $arguments[$i] = $sources[$info['source']][$info['name']];
+              if ($info['source'] == 'param') {
+                $arguments[$i] = $sources[$info['source']][$info['name']];
+              }
+              else {
+                $arguments[$i] = $sources[$info['source']];                
+              }
             }
           }
           // Convert arrays to objects and objects to arrays to be more tolerant
@@ -244,8 +251,7 @@ class RESTServer {
   private function parseRequest($method, $controller) {
     switch ($method) {
       case 'POST':
-        $content_type = explode('; ', $_SERVER['CONTENT_TYPE']);
-        if (in_array('application/x-www-form-urlencoded', $content_type)) {
+        if ($_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded') {
           return $_POST;
         }
       case 'PUT':
