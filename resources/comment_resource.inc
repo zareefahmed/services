@@ -19,7 +19,7 @@ function _comment_resource_definition() {
         'access arguments append' => TRUE,
         'args' => array(
           array(
-            'name' => 'comment',
+            'name' => 'ccomment',
             'type' => 'struct',
             'description' => 'The comment object',
             'source' => 'data',
@@ -164,25 +164,41 @@ function _comment_resource_definition() {
  */
 
 function _comment_resource_create($comment) {
-  $comment = (object)$comment;
-  $cid = NULL;
-
-  // Setup form_state
-  $form_state = array();
-  $form_state['values'] = (array)$comment;
-  $form_state['values']['op'] = t('Save');
-  $ret = drupal_execute('comment_form', $form_state, $comment);
-
-  // Fetch $nid out of $form_state
-  $cid = $form_state['cid'];
-
-  if ($errors = form_get_errors()) {
-    return services_error(implode("\n", $errors), 406);
+  if (!is_object($comment)) {
+    $comment = (object) $comment;
   }
+
+  // If the submitted comment does not contain a uid, set it to anonymous.
+  if (!isset($comment->uid)) {
+    $comment->uid = 0;
+  }
+
+  // If the submitted comment does not contain a nid, then return an error.
+  if (!isset($comment->nid)) {
+    return services_error(t("No node specified."));
+  }
+
+  // If a cid is present then the user is trying to edit an existing comment.
+  if (isset($comment->cid) && ($comment->cid != 0)) {
+    $initial_comment = _comment_load($comment->cid);
+    $admin = user_access("administer comments");
+
+    if ($initial_comment->uid == 0 && !$admin) {
+      return services_error(t("Anonymous comments can't be edited"));
+    }
+
+    if (($initial_comment->uid != $comment->uid || comment_num_replies($comment->cid) != 0) && !$admin) {
+      return services_error(t("User does not have permission to edit this comment"));
+    }
+  }
+
+  // Can I just make a note here about how stupid it is that comment_load returns
+  // an object but comment_save expects an array?
+  $cid = comment_save((array) $comment);
 
   return (object)array(
     'cid' => $cid,
-    'uri' => services_resource_uri(array('comment', $nid)),
+    'uri' => services_resource_uri(array('comment', $cid)),
   );
 }
 
