@@ -8,9 +8,6 @@ function _comment_resource_definition() {
 
   return array(
     'comment' => array(
-
-      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
-
       'create' => array(
         'help' => 'Creates a comment',
         'callback' => '_comment_resource_create',
@@ -80,8 +77,9 @@ function _comment_resource_definition() {
       ),
       'actions' => array(
         'loadNodeComments' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
           'help'   => t('This method returns the number of new comments on a given node since a given timestamp.'),
-          'access callback' => '_node_resource_access',
+          'access callback' => '_comment_resource_node_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_comment_resource_load_node_comments',
@@ -90,28 +88,29 @@ function _comment_resource_definition() {
               'name'         => 'nid',
               'type'         => 'int',
               'description'  => t('The node id to load comments for.'),
-              'source'       => array('path' => '0'),
+              'source'       => 'data',
               'optional'     => FALSE,
             ),
             array(
               'name'         => 'count',
               'type'         => 'int',
               'description'  => t('Number of comments to load.'),
-              'source' => array('path' => '1'),
-              'optional' => TRUE,
+              'source'       => 'data',
+              'optional'     => TRUE,
             ),
             array(
               'name'         => 'start',
               'type'         => 'int',
               'description'  => t('If count is set to non-zero value, you can pass also non-zero value for start. For example to get comments from 5 to 15, pass count=10 and start=5.'),
-              'source'       => array('path' => '2'),
+              'source'       => 'data',
               'optional'     => TRUE,
             ),
           ),
         ),
         'countAll' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
           'help'   => t('This method returns the number of comments on a given node.'),
-          'access callback' => '_node_resource_access',
+          'access callback' => '_comment_resource_node_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_comment_resource_count_all',
@@ -120,14 +119,15 @@ function _comment_resource_definition() {
               'name'         => 'nid',
               'type'         => 'int',
               'description'  => t('The node id to count all comments.'),
-              'source'       => array('path' => '0'),
+              'source'       => 'data',
               'optional'     => FALSE,
             ),
           ),
         ),
         'countNew' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
           'help'   => t('This method returns the number of new comments on a given node since a given timestamp.'),
-          'access callback' => '_node_resource_access',
+          'access callback' => '_comment_resource_node_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_comment_resource_count_new',
@@ -136,7 +136,7 @@ function _comment_resource_definition() {
               'name'          => 'nid',
               'type'          => 'int',
               'description'   => t('The node id to load comments for.'),
-              'source'        => array('path' => '0'),
+              'source'        => 'data',
               'optional'      => FALSE,
             ),
             array(
@@ -144,8 +144,8 @@ function _comment_resource_definition() {
               'type'         => 'int',
               'optional'     => TRUE,
               'description'  => t('Timestamp to count from (defaults to time of last user acces to node).'),
-              'source'        => array('path' => '1'),
-              'optional'      => FALSE,
+              'source'        => 'data',
+              'optional'      => TRUE,
             ),
           ),
         ),
@@ -351,4 +351,15 @@ function _comment_resource_access($op = 'view', $args = array()) {
       // Check if the user may edit the comment
       return comment_access('edit', $comment);
   }
+}
+
+/**
+ * Passthrough function to _node_resource_access().
+ *
+ * @see _node_resource_access()
+ **/
+function _comment_resource_node_access($op = 'view', $args = array()) {
+  module_load_include('inc', 'services', 'resources/node_resource');
+  
+  return _node_resource_access($op, $args);
 }
