@@ -6,6 +6,7 @@ function _system_resource_definition() {
     'system' => array(
       'actions' => array(
         'connect' => array(
+          'access callback' => 'services_access_menu',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/system_resource'),
           'callback' => '_system_resource_connect',
         ),
