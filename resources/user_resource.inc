@@ -241,10 +241,7 @@ function _user_resource_create($account) {
  *   The modified user object.
  */
 function _user_resource_update($uid, $account) {
-  // If the subitted data doesn't already include the uid, then add it.
-  if (!isset($account->uid) || empty($account->uid)) {
-    $account->uid = $uid;
-  }
+  $account->uid = $uid;
 
   // Load the required includes for saving profile information
   // with drupal_execute().

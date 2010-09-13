@@ -206,8 +206,6 @@ function _node_resource_create($node) {
  *   The node's nid.
  *
  * @see drupal_execute()
- *
- * @todo Is the $nid parameter really necessary?
  **/
 function _node_resource_update($nid, $node) {
   $node = (object)$node;

@@ -50,6 +50,13 @@ function _comment_resource_definition() {
         'access arguments append' => TRUE,
         'args' => array(
           array(
+            'name' => 'cid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+            'description' => 'The unique identifier for this comment.',
+          ),
+          array(
             'name' => 'data',
             'type' => 'struct',
             'description' => 'The comment object with updated information',
@@ -217,12 +224,16 @@ function _comment_resource_retrieve($cid) {
 /**
  * Updates a comment and returns the cid.
  *
+ * @param $cid
+ *   Unique identifier for this comment.
  * @param $comment
  *   An object as would be returned from comment_load().
  * @return
  *   Unique identifier for the comment (cid) or FALSE if there was a problem.
  */
-function _comment_resource_update($comment) {
+function _comment_resource_update($cid, $comment) {
+  $comment->cid = $cid;
+
   $old_comment = (array) _comment_load($comment->cid);
   if ($old_comment['cid']) {
     // Setup form_state.

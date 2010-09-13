@@ -47,6 +47,13 @@ function _taxonomy_resource_definition() {
         'callback' => '_taxonomy_term_resource_update',
         'args' => array(
           array(
+            'name' => 'tid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'description' => 'The unique identifier for this taxonomy term.',
+            'type' => 'int',
+          ),
+          array(
             'name' => 'term',
             'optional' => FALSE,
             'source' => 'data',
@@ -109,6 +116,13 @@ function _taxonomy_resource_definition() {
         'callback' => '_taxonomy_vocabulary_resource_update',
         'args' => array(
           array(
+            'name' => 'vid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'description' => 'The unique identifier for this taxonomy vocabulary.',
+            'type' => 'int',
+          ),
+          array(
             'name' => 'vocabulary',
             'optional' => FALSE,
             'source' => 'data',
@@ -153,7 +167,7 @@ function _taxonomy_term_resource_retrieve($tid = NULL){
  * @see
  *
  */
-function _taxonomy_term_resource_create($term=NULL){
+function _taxonomy_term_resource_create($term){
   if (!is_array($term)) {
     $term = (array) $term;
   }
@@ -166,7 +180,8 @@ function _taxonomy_term_resource_create($term=NULL){
  * @see
  *
  */
-function _taxonomy_term_resource_update($term=NULL){
+function _taxonomy_term_resource_update($tid, $term){
+  $term['tid'] = $tid;
   return _taxonomy_term_resource_create($term);
 }
 
@@ -210,7 +225,8 @@ function _taxonomy_vocabulary_resource_create($vocabulary){
  * @see
  *
  */
-function _taxonomy_vocabulary_resource_update($vocabulary){
+function _taxonomy_vocabulary_resource_update($vid, $vocabulary){
+  $vocabulary['vid'] = $vid;
   return _taxonomy_vocabulary_resource_create($vocabulary);
 }
 
