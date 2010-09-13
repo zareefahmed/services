@@ -50,6 +50,13 @@ function _user_resource_definition() {
         'access arguments append' => TRUE,
         'args' => array(
           array(
+            'name' => 'uid',
+            'type' => 'int',
+            'description' => 'Unique identifier for this user',
+            'source' => array('path' => 0),
+            'optional' => FALSE,
+          ),
+          array(
             'name' => 'data',
             'type' => 'struct',
             'description' => 'The user object with updated information',
@@ -225,13 +232,20 @@ function _user_resource_create($account) {
  * This function uses drupal_execute() and as such exepects all input to match 
  * the submitting form in question.
  *
+ * @param $uid
+ *   Unique identifier for this user
  * @param $account
- *   A properly formatted user object.
+ *   Fields to modify for this user.
  *
  * @return
  *   The modified user object.
  */
-function _user_resource_update($account) {
+function _user_resource_update($uid, $account) {
+  // If the subitted data doesn't already include the uid, then add it.
+  if (!isset($account->uid) || empty($account->uid)) {
+    $account->uid = $uid;
+  }
+
   // Load the required includes for saving profile information
   // with drupal_execute().
   module_load_include('inc', 'user', 'user.pages');
