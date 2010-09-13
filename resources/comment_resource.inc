@@ -223,11 +223,11 @@ function _comment_resource_retrieve($cid) {
  *   Unique identifier for the comment (cid) or FALSE if there was a problem.
  */
 function _comment_resource_update($comment) {
-  $old_comment = _comment_load($comment['cid']);
+  $old_comment = (array) _comment_load($comment->cid);
   if ($old_comment['cid']) {
     // Setup form_state.
     $form_state = array();
-    $form_state['values'] = $comment;
+    $form_state['values'] = (array) $comment;
     $form_state['values']['op'] = t('Save');
     $form_state['comment'] = $old_comment;
 
@@ -241,7 +241,7 @@ function _comment_resource_update($comment) {
     return services_error(t('Comment not found'), 404);
   }
 
-  return $comment['cid'];
+  return $comment->cid;
 }
 
 /**
