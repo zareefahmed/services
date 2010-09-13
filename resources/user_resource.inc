@@ -338,6 +338,7 @@ function _user_resource_login($username, $password) {
 
     $return = new stdClass();
     $return->sessid = session_id();
+    $return->session_name = session_name();
     $return->user = $user;
 
     return $return;
