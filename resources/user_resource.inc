@@ -5,12 +5,10 @@
 function _user_resource_definition() {
   return array(
     'user' => array(
-
-      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-
       'retrieve' => array(
         'help' => 'Retrieves a user',
         'callback' => '_user_resource_retrieve',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         'access callback' => '_user_resource_access',
         'access arguments' => array('view'),
         'access arguments append' => TRUE,
@@ -28,6 +26,7 @@ function _user_resource_definition() {
       'create' => array(
         'help' => 'Creates a user',
         'callback' => '_user_resource_create',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         'access callback' => '_user_resource_access',
         'access arguments' => array('create'),
         'access arguments append' => FALSE,
@@ -45,6 +44,7 @@ function _user_resource_definition() {
       'update' => array(
         'help' => 'Updates a user',
         'callback' => '_user_resource_update',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         'access callback' => '_user_resource_access',
         'access arguments' => array('update'),
         'access arguments append' => TRUE,
@@ -69,6 +69,7 @@ function _user_resource_definition() {
       'delete' => array(
         'help' => 'Deletes a user',
         'callback' => '_user_resource_delete',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         'access callback' => '_user_resource_access',
         'access arguments' => array('delete'),
         'access arguments append' => FALSE,
@@ -133,11 +134,13 @@ function _user_resource_definition() {
               'source' => array('data' => 'pass'),
               'optional' => FALSE,
             ),
-            'access callback' => 'services_access_menu',
           ),
+          'access callback' => 'services_access_menu',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         ),
 
         'logout' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'help' => 'Logout a user session',
           'callback' => '_user_resource_logout',
           'access callback' => 'services_access_menu',
