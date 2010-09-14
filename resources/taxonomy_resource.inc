@@ -12,7 +12,6 @@ function _taxonomy_resource_definition() {
 
   return array(
     'taxonomy_term' => array(
-      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       'retrieve' => array(
         'callback' => '_taxonomy_term_resource_retrieve',
         'args' => array(
@@ -27,6 +26,7 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('view'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'create' => array(
         'callback' => '_taxonomy_term_resource_create',
@@ -42,6 +42,7 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('create'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'update' => array(
         'callback' => '_taxonomy_term_resource_update',
@@ -64,6 +65,7 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('update'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'delete' => array(
         'callback' => '_taxonomy_term_resource_delete',
@@ -77,6 +79,7 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('delete'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       // TODO: term specific actions need to be implemented (see: taxonomy_service_get_tree / taxonomy_service_select_nodes)
     ),
@@ -96,6 +99,7 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('view'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'create' => array(
         'callback' => '_taxonomy_vocabulary_resource_create',
@@ -111,6 +115,7 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('create'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'update' => array(
         'callback' => '_taxonomy_vocabulary_resource_update',
@@ -133,6 +138,7 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('update'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'delete' => array(
         'callback' => '_taxonomy_vocabulary_resource_delete',
@@ -146,73 +152,98 @@ function _taxonomy_resource_definition() {
         'access callback' => '_taxonomy_resource_access',
         'access arguments' => array('delete'),
         'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
     ),
   );
 }
 
 /**
- * Services interface to _taxonomy_term_resource_retrieve().
+ * Return the results of taxonomy_get_term() for a specified term id.
  *
- * @see
+ * @param $tid
+ *   Unique identifier for the taxonomy term to retrieve.
+ * @return
+ *   A term object.
  *
+ * @see taxonomy_get_term().
  */
-function _taxonomy_term_resource_retrieve($tid = NULL){
+function _taxonomy_term_resource_retrieve($tid) {
   return taxonomy_get_term($tid);
 }
 
 /**
- * Services interface to _taxonomy_term_resource_create().
+ * Create a new taxonomy term based on submitted values.
  *
- * @see
+ * @param $term
+ *   Array of values for the taxonomy term.
+ * @return
+ *   Status constant indicating if term was inserted or updated.
  *
+ * @see taxonomy_save_term().
  */
-function _taxonomy_term_resource_create($term){
-  if (!is_array($term)) {
-    $term = (array) $term;
-  }
+function _taxonomy_term_resource_create($term) {
+  $term = (array) $term;
   return taxonomy_save_term($term);
 }
 
 /**
- * Services interface to _taxonomy_term_resource_update().
+ * Update a taxonomy term based on submitted values.
  *
- * @see
+ * @param $tid
+ *   Unique identifier for the taxonomy term to update.
+ * @param $term
+ *   Array of values for the taxonomy term.
+ * @return
+ *   Status constant indicating if term was inserted or updated.
  *
+ * @see taxonomy_save_term().
  */
-function _taxonomy_term_resource_update($tid, $term){
+function _taxonomy_term_resource_update($tid, $term) {
   $term['tid'] = $tid;
   return _taxonomy_term_resource_create($term);
 }
 
 /**
- * Services interface to _taxonomy_term_resource_delete().
+ * Delete a taxonomy term.
  *
- * @see
+ * @param $tid
+ *   Unique identifier for the taxonomy term to delete.
+ * @return
+ *   Status constant indicating deletion.
  *
+ * @see taxonomy_del_term().
  */
-function _taxonomy_term_resource_delete($tid=NULL){
+function _taxonomy_term_resource_delete($tid) {
   return taxonomy_del_term($tid);
 }
 
 
 /**
- * Services interface to _taxonomy_vocabulary_resource_retrieve().
+ * Return the results of taxonomy_vocabulary_load() for a specified vocabulary id.
  *
- * @see
+ * @param $vid
+ *   Unique identifier for the taxonomy term to retrieve.
+ * @return
+ *   A vocabulary object or FALSE.
  *
+ * @see taxonomy_vocabulary_load().
  */
-function _taxonomy_vocabulary_resource_retrieve($vid=NULL){
+function _taxonomy_vocabulary_resource_retrieve($vid) {
   return taxonomy_vocabulary_load($vid);
 }
 
 /**
- * Services interface to _taxonomy_vocabulary_resource_create().
+ * Create a new taxonomy vocabulary based on submitted values.
  *
- * @see
+ * @param $vocabulary
+ *   Array of values for the taxonomy vocabulary.
+ * @return
+ *   Status constant indicating if vocabulary was inserted or updated.
  *
+ * @see taxonomy_save_vocabulary().
  */
-function _taxonomy_vocabulary_resource_create($vocabulary){
+function _taxonomy_vocabulary_resource_create($vocabulary) {
   if (!is_array($vocabulary)) {
     $vocabulary = (array) $vocabulary;
   }
@@ -220,23 +251,33 @@ function _taxonomy_vocabulary_resource_create($vocabulary){
 }
 
 /**
- * Services interface to _taxonomy_vocabulary_resource_update().
+ * Update a taxonomy vocabulary based on submitted values.
  *
- * @see
+ * @param $vid
+ *   Unique identifier for the taxonomy term to retrieve.
+ * @param $vocabulary
+ *   Array of values for the taxonomy vocabulary.
+ * @return
+ *   Status constant indicating if vocabulary was inserted or updated.
  *
+ * @see taxonomy_save_vocabulary().
  */
-function _taxonomy_vocabulary_resource_update($vid, $vocabulary){
+function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
   $vocabulary['vid'] = $vid;
   return _taxonomy_vocabulary_resource_create($vocabulary);
 }
 
 /**
- * Services interface to _taxonomy_vocabulary_resource_delete().
+ * Delete a taxonomy vocabulary.
  *
- * @see
+ * @param $vid
+ *   Unique identifier for the taxonomy term to retrieve.
+ * @return
+ *   Status constant indicating deletion.
  *
+ * @see taxonomy_del_vocabulary().
  */
-function _taxonomy_vocabulary_resource_delete($vid=NULL){
+function _taxonomy_vocabulary_resource_delete($vid) {
   return taxonomy_del_vocabulary($vid);
 }
 
