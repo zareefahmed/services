@@ -236,6 +236,25 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
 /**
  * Create a new taxonomy vocabulary based on submitted values.
  *
+ * Here is a sample vocabulary array, taken from
+ * http://drupaldeveloper.in/article/programmatically-create-vocabulary
+ *
+ * @code
+ * $vocabulary = array(
+ *   'name'  => t("Name"). // Human readable name of the vocabulary
+ *   'description' => t("Description"), // extended description of the vocabulary
+ *   'help' => t("help"), // help text
+ *   'tags' => 0, // 1 to make this vocabulary free tagging
+ *   'multiple' => 0, // 1 to allow multiple selection
+ *   'required' => 0, // 1 to make the terms mandatory to be selected
+ *   'hierarchy' => 0, // 1 to allow and create hierarchy of the terms within the vocabulary
+ *   'relations' => 0, // 1 to set and allow relation amongst multiple terms
+ *   'module' => 'mymodule', // provide the module name in which the vocabulary is defined and which is calling this function
+ *   'node' => array('story' => 1), // content types to which this vocabulary will be attached to
+ *   'weight' => -9, // set the weight to display the vocabulary in the list
+ * );
+ * @endcode
+ *
  * @param $vocabulary
  *   Array of values for the taxonomy vocabulary.
  * @return
@@ -244,9 +263,7 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  * @see taxonomy_save_vocabulary().
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
-  if (!is_array($vocabulary)) {
-    $vocabulary = (array) $vocabulary;
-  }
+  $vocabulary = (array) $vocabulary;
   return taxonomy_save_vocabulary($vocabulary);
 }
 
