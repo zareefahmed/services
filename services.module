@@ -35,6 +35,9 @@ function services_perm() {
     'get any binary files',
     'get own binary files',
     'save file information',
+    // System resource permissions
+    'get a system variable',
+    'set a system varaible',
   );
 }
 
