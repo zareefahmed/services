@@ -200,6 +200,7 @@ function _taxonomy_term_resource_create($term) {
  * @see taxonomy_save_term().
  */
 function _taxonomy_term_resource_update($tid, $term) {
+  $term = (array) $term;
   $term['tid'] = $tid;
   return _taxonomy_term_resource_create($term);
 }
@@ -280,6 +281,8 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  * @see taxonomy_save_vocabulary().
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
+  watchdog('services', print_r($vocabulary, TRUE));
+  $vocabulary = (array) $vocabulary;
   $vocabulary['vid'] = $vid;
   return _taxonomy_vocabulary_resource_create($vocabulary);
 }
