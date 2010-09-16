@@ -281,7 +281,6 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  * @see taxonomy_save_vocabulary().
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
-  watchdog('services', print_r($vocabulary, TRUE));
   $vocabulary = (array) $vocabulary;
   $vocabulary['vid'] = $vid;
   return _taxonomy_vocabulary_resource_create($vocabulary);
